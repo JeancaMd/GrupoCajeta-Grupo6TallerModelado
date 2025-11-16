@@ -31,9 +31,9 @@ def test_Test3ValidarUsernameCorrecto():
     válido, msg = menu.validar_username("jskd123")
 
     assert válido == True
-    assert msg == ""
+    ##assert msg == ""
 
-    ##assert msg == "El username solo puede contener letras, números y guión bajo"      ###Error
+    assert msg == "El username solo puede contener letras, números y guión bajo"      ###Error
 
 """
 Test validar_contraseña()
