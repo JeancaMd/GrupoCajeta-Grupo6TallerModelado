@@ -11,7 +11,7 @@ class SalonFama(Window):
         self.db = GrupoCajetaDB()
         self.db.conectar()
         # Cargar puntajes desde la base de datos
-        self.puntajes = self.db.obtener_mejores_puntajes(limite=5)
+        self.tiempos = self.db.obtener_mejores_tiempos(limite=5)
         self.db.cerrar()
         
         # Centro horizontal
@@ -35,6 +35,52 @@ class SalonFama(Window):
         
         self.title = self.title_font.render("🏆 SALÓN DE LA FAMA 🏆", True, (255, 215, 0))
         self.title_rect = self.title.get_rect(center=(self.center_x, self.RESOLUTION[1] * 0.15))
+    
+    def formatear_tiempo(self, segundos):
+        """
+        Convierte segundos a formato MM:SS
+        """
+        if not isinstance(segundos, (int, float)) or segundos < 0:
+            raise ValueError("Los segundos deben ser un número positivo")
+        
+        minutos, segundos = divmod(int(segundos), 60)
+        return f"{minutos:02d}:{segundos:02d}"
+    
+    def obtener_tiempos_formateados(self):
+        """
+        Retorna la lista de tiempos formateados para mostrar
+        """
+        tiempos_formateados = []
+        if self.tiempos:
+            for i, (nombre, tiempo) in enumerate(self.tiempos, start=1):
+                tiempo_formateado = self.formatear_tiempo(tiempo)
+                tiempos_formateados.append({
+                    'posicion': i,
+                    'nombre': nombre,
+                    'tiempo': tiempo_formateado,
+                    'tiempo_segundos': tiempo
+                })
+        return tiempos_formateados
+    
+    def hay_tiempos_registrados(self):
+        """
+        Verifica si hay tiempos registrados en la base de datos
+        """
+        return self.tiempos is not None and len(self.tiempos) > 0
+    
+    def cargar_datos_fama(self):
+        """
+        Carga los datos del salón de la fama desde la base de datos
+        Retorna: lista de tiempos o lista vacía si hay error
+        """
+        try:
+            self.db.conectar()
+            tiempos = self.db.obtener_mejores_tiempos(limite=5)
+            self.db.cerrar()
+            return tiempos
+        except Exception as e:
+            print(f"Error cargando datos del salón de la fama: {e}")
+            return []
     
     def handle_events(self):
         """Maneja los eventos de la pantalla."""
@@ -60,16 +106,18 @@ class SalonFama(Window):
         start_y = self.RESOLUTION[1] * 0.30
         line_height = 60
         
-        if self.puntajes:
-            for i, (nombre, puntos) in enumerate(self.puntajes, start=1):
-                texto = f"{i}. {nombre} — {int(puntos):,} pts"
+        if self.hay_tiempos_registrados():
+            tiempos_formateados = self.obtener_tiempos_formateados()
+            for item in tiempos_formateados:
+                texto = f"{item['posicion']}. {item['nombre']} — {item['tiempo']}"
                 render = self.score_font.render(texto, True, (255, 255, 255))
-                rect = render.get_rect(center=(self.center_x, start_y + (i - 1) * line_height))
+                rect = render.get_rect(center=(self.center_x, start_y + (item['posicion'] - 1) * line_height))
                 self.screen.blit(render, rect)
         else:
-            mensaje = self.info_font.render("Aún no hay puntajes registrados.", True, (200, 200, 200))
+            mensaje = self.info_font.render("Aún no hay tiempos registrados.", True, (200, 200, 200))
             rect = mensaje.get_rect(center=(self.center_x, self.RESOLUTION[1] * 0.5))
             self.screen.blit(mensaje, rect)
+
         
         # Dibujar el botón (solo visual)
         self.back_button.draw()
