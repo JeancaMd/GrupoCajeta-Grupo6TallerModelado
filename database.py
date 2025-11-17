@@ -1,4 +1,9 @@
-import pyodbc, time, bcrypt
+import time, bcrypt
+
+try:
+    import pyodbc
+except ModuleNotFoundError:
+    pyodbc = None
 
 class GrupoCajetaDB:
     def __init__(self):

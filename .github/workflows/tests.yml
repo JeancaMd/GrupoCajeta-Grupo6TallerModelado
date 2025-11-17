@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: windows-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -25,9 +25,13 @@ jobs:
         pip install pytest
         pip install pygame==2.1.3
 
+    - name: Create fake pyodbc module
+      run: |
+        echo "class Error(Exception): pass" > pyodbc.py
+
     - name: Build verification
       run: |
-        python -c "import pygame; print('Pygame installed correctamente')"
+        python -c "import pygame; print('Pygame instalado correctamente')"
         echo "Build OK"
 
     - name: Run unit tests
