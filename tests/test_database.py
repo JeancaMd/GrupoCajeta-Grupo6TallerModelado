@@ -42,6 +42,5 @@ def test_Test2VerificarHashed(grupo_cajeta_db):
     assert resultado == False
 
 def test_Test3VerificarHashed(grupo_cajeta_db):
-    resultado = grupo_cajeta_db.verificar_hashed("password", "no_es_un_hash_valido")
-    
-    assert resultado == False
+    with pytest.raises(ValueError):
+        grupo_cajeta_db.verificar_hashed("password", "no_es_un_hash_valido")
